@@ -1,4 +1,6 @@
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.BiFunction;
 
 public class Main {
 
@@ -6,27 +8,29 @@ public class Main {
 
     public static void main(String[] args) {
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+        CompletableFuture<String> future1 = CompletableFuture.supplyAsync(() -> {
             try {
                 Thread.sleep(3000);
-                System.out.println("Hello");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
             }
+            return "Hello";
         });
-
-        CompletableFuture<Void> future1 = CompletableFuture.runAsync(() -> {
+        CompletableFuture<String> future2 = CompletableFuture.supplyAsync(() -> {
             try {
-                Thread.sleep(5000);
-                System.out.println("World!");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.sleep(3000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
             }
+            return "World";
         });
 
 
-        future.join();
-        future1.join();
+        CompletableFuture<String> combinedFuture = future1.thenCombine(future2, (result1, result2) -> result1 + " " + result2);
+        combinedFuture.thenAccept(result -> System.out.println("Combined result: " + result));
+
+        combinedFuture.join();
+
 
     }
 
